@@ -1,11 +1,14 @@
 import pygame
 import sys
+
 pygame.init()
 
+# Set up screen size and caption
 width, height = 800, 600
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Simple paint')
 
+# Define colors
 white = (255, 255, 255)
 black = (0, 0 , 0)
 green = (0, 255, 0)
@@ -13,57 +16,72 @@ red = (255, 0, 0)
 blue = (0, 0, 255)
 gray = (200, 200, 200)
 
+# Default mode and drawing state
 mode = 'BRUSH'
 drawing = False
 brush_color = black
-start_pos = None
+start_pos = None  # Start position for shapes
 
+# Button class to create and manage toolbar buttons
 class Button:
     def __init__(self, x, y, width, height, text, color, action):
         self.rect = pygame.Rect(x, y, width, height)
-        self.text= text
+        self.text = text
         self.color = color
         self.action = action
+
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
         font = pygame.font.Font(None, 24)
         text_surface = font.render(self.text, True, white)
         screen.blit(text_surface, (self.rect.x + 8, self.rect.y + 8))
+
     def check_action(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 self.action()
 
+# Functions to switch modes or perform actions
 def set_brush():
     global mode
     mode = 'BRUSH'
+
 def set_rect():
     global mode
     mode = 'RECT'
+
 def set_circle():
     global mode
     mode = 'CIRCLE'
+
 def set_eraser():
     global mode
     mode = 'ERASER'
+
 def set_black():
     global brush_color
     brush_color = black
+
 def set_green():
     global brush_color
     brush_color = green
+
 def set_red():
     global brush_color
     brush_color = red
+
 def set_blue():
     global brush_color
     brush_color = blue
+
 def clear_screen():
     screen.fill(white)
+
 def exit_app():
     pygame.quit()
     sys.exit()
 
+# List of toolbar buttons
 buttons = [
     Button(10, 10, 60, 30, 'Brush', black, set_brush),
     Button(80, 10, 60, 30, 'Rect', black, set_rect),
@@ -77,17 +95,23 @@ buttons = [
     Button(640, 10, 60, 30, 'Blue', blue, set_blue),
 ]
 
+# Fill the screen with white initially
 clear_screen()
 
+# Main loop
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
+        # Mouse press event
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 drawing = True
                 start_pos = event.pos
+
+        # Mouse release event to draw shapes
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
                 end_pos = event.pos
@@ -103,9 +127,12 @@ while True:
                         pygame.draw.circle(screen, brush_color, start_pos, radius, 2)
                 drawing = False
                 start_pos = None
+
+        # Check for button clicks
         for button in buttons:
             button.check_action(event)
 
+    # Drawing with brush or eraser while mouse is held down
     if drawing and mode == 'BRUSH':
         x, y = pygame.mouse.get_pos()
         if y > 50:
@@ -115,8 +142,10 @@ while True:
         if y > 50:
             pygame.draw.circle(screen, white, (x, y), 10)
 
+    # Draw toolbar area and all buttons
     pygame.draw.rect(screen, gray, (0, 0, width, 50))
     for button in buttons:
         button.draw(screen)
 
+    # Update the display
     pygame.display.flip()
